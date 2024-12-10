@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const path = require('path');
 
 const tourRouter = require('./routes/tour');
 const userRouter = require('./routes/user');
@@ -13,6 +14,12 @@ const AppError = require('./utils/appError');
 const { errorHandler } = require('./utils/functions');
 
 const app = express();
+app.engine('pug', require('pug').__express)
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// serrving local files on url/public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 1) MIDDLEWARES
 
@@ -52,9 +59,6 @@ app.use(
   })
 );
 
-// 4) serrving local files on url/public
-app.use(express.static(`${__dirname}/public`));
-
 app.use((req, res, next) => {
   console.log('Hello from the middleware 👋');
   req.requestTime = new Date().toISOString();
@@ -62,6 +66,10 @@ app.use((req, res, next) => {
 });
 
 // 3) ROUTES
+app.get('/', (req, res) => {
+  res.render('base');
+});
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);

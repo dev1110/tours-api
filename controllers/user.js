@@ -41,6 +41,7 @@ exports.update = catchAsync(async (req, res, next) => {
 
 exports.delete = handleDelete(User);
 
+// logged in user actions
 exports.me = (req, res, next) => {
   req.params.id = req?.user?._id;
   next();

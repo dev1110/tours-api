@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const User = require('./user');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -83,19 +82,14 @@ const tourSchema = new mongoose.Schema(
     ratingsAverage: {
       type: Number,
       min: [1, 'average rating should be greater than 0'],
-      max: [5, 'average rating should be leass than 5']
+      max: [5, 'average rating should be leass than 5'],
+      set: val => Math.round(val * 10) / 10
     },
     ratingsQuantity: Number,
-    // reviews: [
-    //   {
-    //     type: mongoose.Schema.ObjectId,
-    //     ref: 'Review'
-    //   }
-    // ],
     slug: String,
     startDates: [Date],
     startLocation: {
-      // GeoJSONt
+      // GeoJSON
       type: {
         type: String,
         defalult: 'Point',
@@ -128,6 +122,8 @@ tourSchema.virtual('reviews', {
   localField: '_id'
 });
 
+tourSchema.index({ startLocation: '2dsphere' });
+
 // Document middleware:  runs before .save() and .create()
 tourSchema.pre('save', function(next) {
   this.slug = slugify(this.name, { lower: true });
@@ -139,6 +135,7 @@ tourSchema.pre('save', function(next) {
 //   this.guides = await Promise.all(guidesPromises);
 //   next();
 // });
+
 // Document middleware:  runs after .save() and .create()
 tourSchema.post('save', function(doc, next) {
   next();
@@ -153,6 +150,7 @@ tourSchema.pre(/^find/, function(next) {
   });
   next();
 });
+
 tourSchema.post(/^find/, function(doc, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
   next();

@@ -16,18 +16,24 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);
-router.patch('/change-password/', protect, updatePassword);
 
-router.route('/me').get(protect, user.me, user.get);
-router.route('/deactivate').delete(protect, user.deactivate);
+// adding protect middleware for all the routes after this point
+router.use(protect);
+
+router.patch('/change-password/', updatePassword);
+router.route('/me').get(user.me, user.get);
+router.route('/deactivate').delete(user.deactivate);
+
+// routes only admin can access
+router.use(restrictTo('admin'));
 
 router
   .route('/')
-  .post(protect, user.create)
-  .patch(protect, user.update)
-  .delete(protect, restrictTo('admin'), user.delete);
+  .get(user.getAll)
+  .post(user.create)
+  .patch(user.update)
+  .delete(user.delete);
 
-router.route('/all').get(user.getAll);
-router.route('/:id').get(protect, user.get);
+router.route('/:id').get(user.get);
 
 module.exports = router;
