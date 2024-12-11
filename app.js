@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 1) MIDDLEWARES
 
-// set secuirity http headers
+// Set secuirity http headers
 app.use(helmet());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
